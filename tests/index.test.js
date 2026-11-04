@@ -40,3 +40,42 @@ test('Pear Desktop App - With default settings, app is launched and visible', as
 
   await app.close();
 });
+
+test('Alt shortcuts navigate between history, global charts and home', async () => {
+  const app = await electron.launch({
+    cwd: appPath,
+    // NODE_ENV=test sandboxes the preload, which stops renderer plugins loading.
+    env: { ...process.env, NODE_ENV: 'production' },
+    args: [
+      appPath,
+      '--no-sandbox',
+      '--disable-gpu',
+      '--whitelisted-ips=',
+      '--disable-dev-shm-usage',
+    ],
+  });
+
+  const window = await app.firstWindow();
+  await window.waitForSelector('ytmusic-app ytmusic-browse-response', {
+    state: 'attached',
+  });
+
+  // Polled because plugins start after the page first renders.
+  const pressUntil = (key, url) =>
+    expect(async () => {
+      await window.keyboard.press(key);
+      await window.waitForURL(url, { timeout: 3000, waitUntil: 'commit' });
+    }).toPass({ timeout: 30000 });
+
+  await pressUntil('Alt+h', /\/history$/);
+
+  await pressUntil('Alt+g', /\/charts$/);
+  // The picker only exposes its label; `ZZ` is labelled "Global" in English.
+  await expect(
+    window.locator('ytmusic-sort-filter-button-renderer').first(),
+  ).toHaveText(/Global/);
+
+  await pressUntil('Alt+Escape', /\.com\/$/);
+
+  await app.close();
+});

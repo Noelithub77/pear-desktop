@@ -600,6 +600,10 @@
       },
       "name": "In-App Menu"
     },
+    "keyboard-navigation": {
+      "description": "Alt+H for history, Alt+G for global charts, Alt+Esc for home",
+      "name": "Keyboard Navigation"
+    },
     "lumiastream": {
       "description": "Adds Lumia Stream support",
       "name": "Lumia Stream [Beta]"

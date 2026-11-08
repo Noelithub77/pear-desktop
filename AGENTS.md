@@ -1,6 +1,6 @@
 # Pear Desktop fork
 
-Personal fork of [pear-devs/pear-desktop](https://github.com/pear-devs/pear-desktop), an Electron wrapper around the music site. `origin` is the fork and `upstream` is pear-devs. Keep changes small and in new files where possible so upstream merges stay easy.
+Personal fork of [pear-devs/pear-desktop](https://github.com/pear-devs/pear-desktop), an Electron wrapper around the music site. `origin` is the fork and `pear-devs` is the original repo; T3 Code treats a remote named `upstream` as the project's repo, so keep that name unused. Pull their changes with `git fetch pear-devs && git merge pear-devs/master`. Keep changes small and in new files where possible so upstream merges stay easy.
 
 ## Layout
 

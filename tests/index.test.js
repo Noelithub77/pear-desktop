@@ -77,5 +77,23 @@ test('Alt shortcuts navigate between history, global charts and home', async () 
 
   await pressUntil('Alt+Escape', /\.com\/$/);
 
+  // By now the shortcut pages are prefetched, so they open without a page request.
+  await window.evaluate(() => {
+    const inner = window.fetch;
+    globalThis.browseSources = [];
+    window.fetch = async (input, init) => {
+      const response = await inner(input, init);
+      if (input instanceof Request && input.url.includes('/youtubei/v1/browse')) {
+        // A response built in memory has no URL.
+        globalThis.browseSources.push(response.url === '' ? 'memory' : 'network');
+      }
+      return response;
+    };
+  });
+  await pressUntil('Alt+g', /\/charts$/);
+  expect(await window.evaluate(() => globalThis.browseSources)).toEqual([
+    'memory',
+  ]);
+
   await app.close();
 });

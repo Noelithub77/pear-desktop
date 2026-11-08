@@ -5,7 +5,7 @@ Personal fork of [pear-devs/pear-desktop](https://github.com/pear-devs/pear-desk
 ## Layout
 
 - `src/plugins/<name>/index.ts`: plugins, discovered automatically by `vite-plugins/plugin-importer.mts`.
-- `src/plugins/keyboard-navigation`: this fork's Alt+H, Alt+G and Alt+Esc page shortcuts.
+- `src/plugins/keyboard-navigation`: this fork's Alt+H, Alt+G and Alt+Esc page shortcuts. `page-cache.ts` prefetches those pages and answers the shortcut's page request from memory; it relies on undocumented site internals (`networkManager.fetch`, gzipped `/youtubei/v1/browse` bodies, the `/api/stats/playback` ping).
 - `tools/ops.mjs`: operator entry point.
 - `tests/`: Playwright tests that launch the app against the live site. Run them from a built tree (`pnpm build`) with a disposable HOME, because they read and write the real app profile.
 

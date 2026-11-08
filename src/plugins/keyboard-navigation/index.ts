@@ -1,12 +1,20 @@
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
 
-const browseEndpoints = new Map<string, object>([
+import {
+  type BrowseEndpoint,
+  type PageCache,
+  startPageCache,
+} from './page-cache';
+
+const browseEndpoints = new Map<string, BrowseEndpoint>([
   ['h', { browseId: 'FEmusic_history' }],
   // `ZZ` is the charts page's "Global" option. Without it the page opens on the user's own country.
   ['g', { browseId: 'FEmusic_charts', formData: { selectedValues: ['ZZ'] } }],
   ['escape', { browseId: 'FEmusic_home' }],
 ]);
+
+let pageCache: PageCache | null = null;
 
 const onKeyDown = (event: KeyboardEvent) => {
   if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
@@ -18,6 +26,7 @@ const onKeyDown = (event: KeyboardEvent) => {
   event.stopPropagation();
   if (event.repeat) return;
 
+  pageCache?.claim(browseEndpoint);
   // The site's own router, so playback continues across the page change.
   document.querySelector('ytmusic-app')?.dispatchEvent(
     new CustomEvent('yt-navigate', {
@@ -39,8 +48,15 @@ export default createPlugin({
     start() {
       window.addEventListener('keydown', onKeyDown, true);
     },
+    // Prefetching needs the site's request client, which is ready by now.
+    onPlayerApiReady() {
+      pageCache?.stop();
+      pageCache = startPageCache([...browseEndpoints.values()]);
+    },
     stop() {
       window.removeEventListener('keydown', onKeyDown, true);
+      pageCache?.stop();
+      pageCache = null;
     },
   },
 });

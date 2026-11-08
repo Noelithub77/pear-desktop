@@ -1,0 +1,35 @@
+#content.pear-tab-active > :not(.pear-tab-view),
+.pear-tab-view[hidden] {
+  display: none !important;
+}
+
+.pear-tab-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+/* Matches the site's own chips. */
+.pear-tab {
+  height: 32px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.pear-tab:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.pear-tab[aria-selected='true'] {
+  background: #fff;
+  color: #030303;
+}

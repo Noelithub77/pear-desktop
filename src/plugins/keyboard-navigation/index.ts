@@ -1,40 +1,54 @@
 import { t } from '@/i18n';
 import { createPlugin } from '@/utils';
 
-import {
-  type BrowseEndpoint,
-  type PageCache,
-  startPageCache,
-} from './page-cache';
+import style from './style.css?inline';
+import { type TabSpec, type Tabs, startTabs } from './tabs';
 
-const browseEndpoints = new Map<string, BrowseEndpoint>([
-  ['h', { browseId: 'FEmusic_history' }],
-  // `ZZ` is the charts page's "Global" option. Without it the page opens on the user's own country.
-  ['g', { browseId: 'FEmusic_charts', formData: { selectedValues: ['ZZ'] } }],
-  ['escape', { browseId: 'FEmusic_home' }],
-]);
+const tabKeys = ['escape', 'h', 'g'];
 
-let pageCache: PageCache | null = null;
+const tabSpecs = (): TabSpec[] => [
+  {
+    label: t('plugins.keyboard-navigation.tabs.home'),
+    shortcut: 'Alt+Esc',
+    path: '/',
+    endpoint: { browseId: 'FEmusic_home' },
+  },
+  {
+    label: t('plugins.keyboard-navigation.tabs.history'),
+    shortcut: 'Alt+H',
+    path: '/history',
+    endpoint: { browseId: 'FEmusic_history' },
+  },
+  {
+    label: t('plugins.keyboard-navigation.tabs.charts'),
+    shortcut: 'Alt+G',
+    path: '/charts',
+    // `ZZ` is the charts page's "Global" option. Without it the page opens on the user's own country.
+    endpoint: {
+      browseId: 'FEmusic_charts',
+      formData: { selectedValues: ['ZZ'] },
+    },
+  },
+];
+
+let tabs: Tabs | null = null;
 
 const onKeyDown = (event: KeyboardEvent) => {
-  if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (!tabs || event.metaKey) return;
 
-  const browseEndpoint = browseEndpoints.get(event.key.toLowerCase());
-  if (!browseEndpoint) return;
+  if (event.ctrlKey && !event.altKey && event.key === 'Tab') {
+    event.preventDefault();
+    event.stopPropagation();
+    tabs.cycle(event.shiftKey ? -1 : 1);
+    return;
+  }
 
+  if (!event.altKey || event.ctrlKey || event.shiftKey) return;
+  const index = tabKeys.indexOf(event.key.toLowerCase());
+  if (index === -1) return;
   event.preventDefault();
   event.stopPropagation();
-  if (event.repeat) return;
-
-  pageCache?.claim(browseEndpoint);
-  // The site's own router, so playback continues across the page change.
-  document.querySelector('ytmusic-app')?.dispatchEvent(
-    new CustomEvent('yt-navigate', {
-      bubbles: true,
-      composed: true,
-      detail: { endpoint: { browseEndpoint } },
-    }),
-  );
+  if (!event.repeat) tabs.show(index);
 };
 
 export default createPlugin({
@@ -44,19 +58,20 @@ export default createPlugin({
   config: {
     enabled: true,
   },
+  stylesheets: [style],
   renderer: {
     start() {
       window.addEventListener('keydown', onKeyDown, true);
     },
-    // Prefetching needs the site's request client, which is ready by now.
+    // The tabs fetch through the site's request client, which is ready by now.
     onPlayerApiReady() {
-      pageCache?.stop();
-      pageCache = startPageCache([...browseEndpoints.values()]);
+      tabs?.stop();
+      tabs = startTabs(tabSpecs());
     },
     stop() {
       window.removeEventListener('keydown', onKeyDown, true);
-      pageCache?.stop();
-      pageCache = null;
+      tabs?.stop();
+      tabs = null;
     },
   },
 });

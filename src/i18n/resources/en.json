@@ -601,8 +601,13 @@
       "name": "In-App Menu"
     },
     "keyboard-navigation": {
-      "description": "Alt+H for history, Alt+G for global charts, Alt+Esc for home",
-      "name": "Keyboard Navigation"
+      "description": "Preloaded Home, History and global Charts tabs: Alt+Esc, Alt+H and Alt+G open them, Ctrl+Tab cycles",
+      "name": "Keyboard Navigation",
+      "tabs": {
+        "charts": "Charts",
+        "history": "History",
+        "home": "Home"
+      }
     },
     "lumiastream": {
       "description": "Adds Lumia Stream support",
